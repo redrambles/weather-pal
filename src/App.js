@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useState} from "react"
 
 import Header from "./components/Header"
 import WeatherSearch from "./components/WeatherSearch"
@@ -7,13 +7,13 @@ import Error from "./components/Error"
 import Container from "./components/Container"
 import './App.css'
 
-class App extends React.Component {
-    state = {
-        weather: null,
-        showError: false,
-        errorMessage: ""
-    }
-    api_call = async (e) => {
+const App = () => {
+
+    const [weather, setWeather] = useState(null)
+    const [showError, setShowError] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
+
+    const api_call = async (e) => {
         e.preventDefault();
         const location = e.target.elements.location.value;
         const API_KEY = process.env.REACT_APP_API_KEY // Must start with 'REACT_APP' in order for this to work
@@ -22,24 +22,30 @@ class App extends React.Component {
             const request = await fetch(url)
             const response = await request.json()
             if (response.cod === 200) {
-              this.setState({weather: response, showError: false, errorMessage: ""})
+                setWeather(response)
+                setShowError(false)
+                setErrorMessage("")
             } else {
-              this.setState({weather: null, showError: true, errorMessage:"Could not find weather info for this location, please try again."})
+                setWeather(null)
+                setShowError(true)
+                setErrorMessage("Could not find weather info for this location, please try again.")
             }    
         } else {
-            this.setState({weather: null, showError: true, errorMessage:"Please enter a location"})
+            setWeather(null)
+            setShowError(true)
+            setErrorMessage("Please enter a location")
         }
     }
-    render() {
-        return (
-            <Container>
-                <Header />
-                <WeatherSearch api_call={this.api_call}/>
-                { this.state.weather && <WeatherData weatherData={this.state.weather} /> }
-                { this.state.showError && <Error message={this.state.errorMessage} />}
-            </Container>
-        )
-    }
+ 
+    return (
+        <Container>
+            <Header />
+            <WeatherSearch api_call={api_call}/>
+            { weather && <WeatherData weatherData={weather} /> }
+            { showError && <Error message={errorMessage} />}
+        </Container>
+    )
+ 
 }
 
 export default App;
